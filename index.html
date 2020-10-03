@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css"
+          integrity="sha384-v8BU367qNbs/aIZIxuivaU55N5GPF89WBerHoGA4QTcbUjYiLQtKdrfXnqAcXyTv" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Courier Prime">
+    <title>Using Cognito</title>
+    <style>
+        #id-token, #decoded-id-token, #access-token, #decoded-access-token {
+            font-family: 'Courier Prime', serif;
+            background-color: #E8EAED;
+        }
+
+        .card-header {
+            background-color: lightseagreen;
+            font-weight: bold;
+        }
+
+        input {
+            font-family: 'Courier Prime', serif;
+        }
+
+        .card-body {
+            background-color: #E8EAED;
+        }
+
+    </style>
+
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row justify-content-center mt-2">
+        <h5>Cognito 101 - Getting ID Token, Access Token from Cognito</h5>
+    </div>
+</div>
+<div class="row my-3 ml-2">
+    <div class="col-md-7">
+        <div id="token-section" style="display: none">
+            <div class="row">
+                <!-- Encoded ID Token -->
+                <div class="col-6 d-flex">
+                    <div class="card">
+                        <div class="card-header">Id Token</div>
+                        <div class="card-body">
+                            <div id="id-token" class="mx-2 my-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Decoded ID Token -->
+                <div class="col-6 d-flex">
+                    <div class="card">
+                        <div class="card-header">Decoded Id Token</div>
+                        <div class="card-body">
+                            <div id="decoded-id-token" class="mx-2 my-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <!-- Encoded Access Token -->
+                <div class="col-6 d-flex">
+                    <div class="card">
+                        <div class="card-header">Access Token</div>
+                        <div class="card-body">
+                            <div id="access-token" class="mx-2 my-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Decoded Access Token -->
+                <div class="col-6 d-flex">
+                    <div class="card">
+                        <div class="card-header">Decoded Access Token</div>
+                        <div class="card-body">
+                            <div id="decoded-access-token" class="mx-2 my-2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card rounded-lg">
+            <div class="card-body">
+                <!-- Region -->
+                <div class="form-group row">
+                    <label for="region" class="col-sm-3 col-form-label">Region</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="region" placeholder="Region">
+                    </div>
+                </div>
+
+                <!-- User Pool ID -->
+                <div class="form-group row">
+                    <label for="user-pool-id" class="col-sm-3 col-form-label">User Pool ID</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="user-pool-id" placeholder="User Pool ID">
+                    </div>
+                </div>
+
+                <!-- Identity Pool ID -->
+                <div class="form-group row">
+                    <label for="identity-pool-id" class="col-sm-3 col-form-label">Identity Pool ID</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="identity-pool-id" placeholder="Identity Pool ID">
+                    </div>
+                </div>
+
+                <!-- Client ID-->
+                <div class="form-group row">
+                    <label for="client-id" class="col-sm-3 col-form-label">App ID</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="client-id" placeholder="App ID">
+                    </div>
+                </div>
+
+                <div class="form-group row">
+                    <div class="col-sm-12">
+                        <div class="alert alert-danger" role="alert" id="config-message"
+                             style="display: none">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-right">
+                    <button type="submit" class="btn btn-warning" id="save-btn">Save</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-2">
+            <div class="card-body">
+                <div>
+                    <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="signup-tab"
+                               data-toggle="pill"
+                               href="#pills-signup"
+                               role="tab" aria-controls="pills-signup" aria-selected="true">SignUp</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="signin-tab" data-toggle="pill"
+                               href="#pills-signin"
+                               role="tab" aria-controls="pills-signin" aria-selected="false">SignIn</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="tab-content my-2" id="pills-tabContent">
+                    <div class="tab-pane fade show active" id="pills-signup" role="tabpanel"
+                         aria-labelledby="signup-tab">
+
+                        <div class="card">
+                            <div class="card-body">
+                                <form>
+                                    <div class="form-group row">
+                                        <label for="name" class="col-sm-3 col-form-label">Name</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" id="name" placeholder="Name"
+                                                   autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="signup-email" class="col-sm-3 col-form-label">Email</label>
+                                        <div class="col-sm-9">
+                                            <input type="email" class="form-control" id="signup-email"
+                                                   placeholder="Email" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="signup-password" class="col-sm-3 col-form-label">Password</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" class="form-control" id="signup-password"
+                                                   placeholder="Password">
+                                        </div>
+                                    </div>
+
+                                    <div style="display: none" id="code-block">
+                                        <div class="form-group row">
+                                            <label for="code" class="col-sm-3 col-form-label">Code</label>
+                                            <div class="col-sm-9">
+                                                <input type="text" class="form-control" id="code" placeholder="Code"
+                                                       autocomplete="off">
+                                                <small class="text-muted">Check your email for a 6 digit code from AWS
+                                                    and
+                                                    enter it here.</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-12">
+                                            <div class="alert alert-danger" role="alert" id="signup-message"
+                                                 style="display: none">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-2"></div>
+                                        <div class="col-sm-10 text-right">
+                                            <button type="submit" class="btn btn-primary" id="signup-btn">Sign Up
+                                            </button>
+                                            <button type="submit" class="btn btn-primary" id="confirm-user-btn"
+                                                    style="display: none">Confirm User
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="tab-pane fade show" id="pills-signin" role="tabpanel"
+                         aria-labelledby="signin-tab">
+
+                        <div class="card">
+                            <div class="card-body">
+                                <form>
+                                    <div class="form-group row">
+                                        <label for="signin-email" class="col-sm-3 col-form-label">Email</label>
+                                        <div class="col-sm-9">
+                                            <input type="email" class="form-control" id="signin-email"
+                                                   placeholder="Email" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <label for="signin-password" class="col-sm-3 col-form-label">Password</label>
+                                        <div class="col-sm-9">
+                                            <input type="password" class="form-control" id="signin-password"
+                                                   placeholder="Password" autocomplete="off">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-12">
+                                            <div class="alert alert-danger" role="alert" id="signin-message"
+                                                 style="display: none">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row">
+                                        <div class="col-sm-2"></div>
+                                        <div class="col-sm-10 text-right">
+                                            <button type="submit" class="btn btn-warning" id="signin-btn">SignIn
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script
+        src="http://code.jquery.com/jquery-3.4.1.min.js"
+        integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+        integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+        crossorigin="anonymous"></script>
+<script src="js/aws-sdk-2.763.0.min.js"></script>
+<script src="js/aws-cognito-sdk.min.js"></script>
+<script src="js/amazon-cognito-identity.min.js"></script>
+<script src="js/jwt-decode.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
