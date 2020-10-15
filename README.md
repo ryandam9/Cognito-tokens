@@ -138,7 +138,7 @@ As per AWS, “*Amazon Cognito identity pools provide temporary AWS credentials 
 
 I wrote a very simple Java Script browser application that takes a User Pool Configuration and fetches ID token/Access token from Cognito. If an S3 bucket name is given, it tries to list the objects in the bucket (To support this CORS access should be enabled on the bucket and the Role given to Authenticated users should have a policy giving access on the S3 bucket).
 
-![](./images/cognito-tokens-1.JPG)
+![](./images/tokens-1.JPG)
 
 ![](./images/tokens-2.JPG)
 
