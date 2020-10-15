@@ -5,6 +5,7 @@ var appId;
 var poolData;
 var userPool;
 var cognitoUser = '';
+var s3BucketName = '';
 
 // Set Event handlers
 document.getElementById('signup-btn').addEventListener('click', addUser);
@@ -22,12 +23,13 @@ function saveConfigData(e) {
     configMessage.innerText = '';
 
     // Read UI Data
-    region = document.getElementById('region').value;
-    userPoolId = document.getElementById('user-pool-id').value;
-    identityPoolId = document.getElementById('identity-pool-id').value;
-    appId = document.getElementById('client-id').value;
+    region = document.getElementById('region').value.trim();
+    userPoolId = document.getElementById('user-pool-id').value.trim();
+    identityPoolId = document.getElementById('identity-pool-id').value.trim();
+    appId = document.getElementById('client-id').value.trim();
+    s3BucketName = document.getElementById('s3-bucket').value.trim();
 
-    if (region === '' || userPoolId === '' || identityPoolId === '' || appId === '') {
+    if (region === '' || userPoolId === '' || appId === '' || identityPoolId === '') {
         configMessage.innerText = 'Provide Region, User Pool ID, Identity Pool ID, app ID values';
         configMessage.style.display = 'block';
         configMessage.className = 'alert alert-danger';
@@ -53,9 +55,9 @@ function addUser(e) {
 
     e.preventDefault();
 
-    let name = document.getElementById('name').value;
-    let email = document.getElementById('signup-email').value;
-    let password = document.getElementById('signup-password').value;
+    let name = document.getElementById('name').value.trim();
+    let email = document.getElementById('signup-email').value.trim();
+    let password = document.getElementById('signup-password').value.trim();
 
     if (name.length === 0 || email === 0 || password === 0) {
         return;
@@ -184,47 +186,16 @@ function authenticateUser(e) {
                                 var sessionToken = AWS.config.credentials.sessionToken;
                             });
 
-                            // Create a new service object
-                            // var s3 = new AWS.S3({
-                            //     apiVersion: '2006-03-01',
-                            //     params: {Bucket: 'Specify bucket name here'}
-                            // });
-
-                            // Call S3 to list the buckets
-                            // s3.listObjects({Delimiter: '/'}, function (err, data) {
-                            //     if (err) {
-                            //         return alert('There was an error listing your albums: ' + err.message);
-                            //     } else {
-                            //         var albums = data.CommonPrefixes.map(function (commonPrefix) {
-                            //             var prefix = commonPrefix.Prefix;
-                            //             var albumName = decodeURIComponent(prefix.replace('/', ''));
-                            //             var albumPhotosKey = encodeURIComponent(albumName) + '/';
-                            //
-                            //             s3.listObjects({Prefix: albumPhotosKey}, function (err, data) {
-                            //                 if (err) {
-                            //                     return alert('There was an error viewing your album: ' + err.message);
-                            //                 }
-                            //                 // 'this' references the AWS.Response instance that represents the response
-                            //                 var href = this.request.httpRequest.endpoint.href;
-                            //                 var bucketUrl = href + 'Specify bucket name here' + '/';
-                            //
-                            //                 var photos = data.Contents.map(function (photo) {
-                            //                     var photoKey = photo.Key;
-                            //                     var photoUrl = bucketUrl + encodeURIComponent(photoKey);
-                            //                     console.log(photoUrl);
-                            //                 });
-                            //             });
-                            //         });
-                            //     }
-                            // });
+                            if (s3BucketName.length > 0)
+                                listS3Bucket(s3BucketName);
                         }
                     });
                 }
             },
             onFailure: function (err) {
-                        signinMessage.innerText = err;
-                        signinMessage.style.display = 'block';
-                        signinMessage.className = 'alert alert-danger';
+                signinMessage.innerText = err;
+                signinMessage.style.display = 'block';
+                signinMessage.className = 'alert alert-danger';
             }
         }
     );
@@ -273,4 +244,44 @@ function parseAccessToken(accessToken) {
     temp.appendChild(createListElement('scope', decodedAccessToken.scope));
 
     return temp;
+}
+
+function listS3Bucket(bucket) {
+    let temp = document.createElement('ul');
+
+    // Create a new service object
+    var s3 = new AWS.S3({
+        apiVersion: '2006-03-01',
+        params: {Bucket: bucket}
+    });
+
+    // Call S3 to list the buckets
+    s3.listObjects({Delimiter: '/'}, function (err, data) {
+        if (err) {
+            return alert('There was an error listing your albums: ' + err.message);
+        } else {
+            data.CommonPrefixes.map(function (commonPrefix) {
+                var prefix = commonPrefix.Prefix;
+                var prefixWithoutSlash = decodeURIComponent(prefix.replace('/', ''));
+                var key = encodeURIComponent(prefixWithoutSlash) + '/';
+
+                s3.listObjects({Prefix: key}, function (err, data) {
+                    if (err) {
+                        return alert('There was an error viewing your album: ' + err.message);
+                    }
+                    // 'this' references the AWS.Response instance that represents the response
+                    var href = this.request.httpRequest.endpoint.href;
+                    var bucketUrl = href + bucket + '/';
+
+                    data.Contents.map(function (photo) {
+                        var photoKey = photo.Key;
+                        var photoUrl = bucketUrl + encodeURIComponent(photoKey);
+                        temp.appendChild(createListElement('Object', photoUrl));
+                    });
+                });
+            });
+        }
+    });
+
+    document.getElementById('s3-objects').appendChild(temp);
 }

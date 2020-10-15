@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Courier Prime">
     <title>Using Cognito</title>
     <style>
-        #id-token, #decoded-id-token, #access-token, #decoded-access-token {
+        #id-token, #decoded-id-token, #access-token, #decoded-access-token, #s3-objects {
             font-family: 'Courier Prime', serif;
             background-color: #E8EAED;
         }
@@ -93,7 +93,7 @@
                 <div class="form-group row">
                     <label for="region" class="col-sm-3 col-form-label">Region</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="region" placeholder="Region">
+                        <input type="text" class="form-control" id="region" placeholder="Region" autocomplete="on" name="region">
                     </div>
                 </div>
 
@@ -101,15 +101,7 @@
                 <div class="form-group row">
                     <label for="user-pool-id" class="col-sm-3 col-form-label">User Pool ID</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="user-pool-id" placeholder="User Pool ID">
-                    </div>
-                </div>
-
-                <!-- Identity Pool ID -->
-                <div class="form-group row">
-                    <label for="identity-pool-id" class="col-sm-3 col-form-label">Identity Pool ID</label>
-                    <div class="col-sm-9">
-                        <input type="text" class="form-control" id="identity-pool-id" placeholder="Identity Pool ID">
+                        <input type="text" class="form-control" id="user-pool-id" placeholder="User Pool ID" autocomplete="on" name="user-pool-id">
                     </div>
                 </div>
 
@@ -117,7 +109,23 @@
                 <div class="form-group row">
                     <label for="client-id" class="col-sm-3 col-form-label">App ID</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" id="client-id" placeholder="App ID">
+                        <input type="text" class="form-control" id="client-id" placeholder="App ID" autocomplete="on" name="client-id">
+                    </div>
+                </div>
+
+                <!-- Identity Pool ID -->
+                <div class="form-group row">
+                    <label for="identity-pool-id" class="col-sm-3 col-form-label">Identity Pool ID</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="identity-pool-id" placeholder="Identity Pool ID" autocomplete="on" name="identity-pool-id">
+                    </div>
+                </div>
+
+                <!-- S3 Bucket -->
+                <div class="form-group row">
+                    <label for="s3-bucket" class="col-sm-3 col-form-label">S3 Bucket Name</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="s3-bucket" placeholder="S3 Bucket name (Optional)" autocomplete="on" name="s3-bucket">
                     </div>
                 </div>
 
@@ -257,6 +265,14 @@
                                         </div>
                                     </div>
                                 </form>
+                            </div>
+
+                        </div>
+                        <div class="card">
+                            <br>
+                            <hr>
+                            <div class="card-body">
+                                <div id="s3-objects"></div>
                             </div>
                         </div>
                     </div>
